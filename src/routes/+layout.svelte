@@ -23,6 +23,7 @@
         position: sticky;
         top: 0;
         width: 200px;
+        min-width: 200px;
         height: 100vh;
         display: flex;
         align-items: center;

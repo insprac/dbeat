@@ -2,21 +2,6 @@ use std::path::Path;
 
 use crate::cue::{CueSheet, WaveFile};
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("std IO error: {0}")]
-    IO(#[from] std::io::Error),
-}
-
-impl serde::Serialize for Error {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        serializer.serialize_str(self.to_string().as_ref())
-    }
-}
-
 /// Searches the given directory for all cue sheet (.cue) files and associated (.wav) file.
 /// Cue sheets and wave files are parsed extracting their metadata.
 ///
