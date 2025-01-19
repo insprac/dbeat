@@ -1,3 +1,7 @@
+//! Provides cue sheet (.cue) file support for parsing and metadata extraction.
+//! Support only extends to the fields Rekordbox exports, any other properties that can be in cue
+//! sheets are ignored for now, further support may be added in future.
+
 use serde::{Deserialize, Serialize};
 
 /// Track metadata extracted from a cue sheet representing a song in the recording.
