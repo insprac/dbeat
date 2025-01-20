@@ -29,6 +29,14 @@ async fn get_default_path() -> Option<String> {
 }
 
 #[tauri::command]
+async fn get_cue_sheet(path: &str) -> Result<cue::CueSheet, String> {
+    fs_search::read_cue_sheet(path).map_err(|error| {
+        tracing::error!(?error, "failed to read file");
+        error.to_string()
+    })
+}
+
+#[tauri::command]
 async fn find_cue_sheets(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<cue::CueSheet>, String> {
     let state = state.lock().map_err(|err| {
         state.clear_poison();
@@ -58,7 +66,7 @@ pub fn run() {
             app.manage(Mutex::new(AppState::default()));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_default_path, find_cue_sheets])
+        .invoke_handler(tauri::generate_handler![get_default_path, get_cue_sheet, find_cue_sheets])
         .run(tauri::generate_context!())
         .unwrap_or_else(|error| {
             tracing::error!(?error, "error while running tauri application");

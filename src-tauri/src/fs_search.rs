@@ -47,11 +47,9 @@ pub fn find_cue_sheets(path: &str) -> Vec<CueSheet> {
     let mut cue_sheets: Vec<CueSheet> = Vec::new();
 
     for file in cue_files {
-        match std::fs::read_to_string(&file) {
-            Ok(content) => {
-                let mut cue = CueSheet::parse(file, &content);
-                cue.wave_file = try_find_wav_for_cue_file(&cue.file_path);
-                cue_sheets.push(cue);
+        match read_cue_sheet(&file) {
+            Ok(cue_sheet) => {
+                cue_sheets.push(cue_sheet);
             }
             Err(error) => {
                 tracing::warn!(?error, file, "failed to read cue file");
@@ -64,6 +62,16 @@ pub fn find_cue_sheets(path: &str) -> Vec<CueSheet> {
     }
 
     cue_sheets
+}
+
+/// Reads a cue sheet with the given path and parses the file contents.
+/// Note this can result in an empty `CueSheet` struct if it's not formatted correctly.
+/// Fails if there was an IO error such as the file not existing or lack of permission.
+pub fn read_cue_sheet(path: &str) -> Result<CueSheet, std::io::Error> {
+    let content = std::fs::read_to_string(path)?;
+    let mut cue = CueSheet::parse(path.to_string(), &content);
+    cue.wave_file = try_find_wav_for_cue_file(&cue.file_path);
+    Ok(cue)
 }
 
 /// Trys to read and parse a (.wav) file with the same name as the given (.cue) file changing the
