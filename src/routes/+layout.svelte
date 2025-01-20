@@ -5,7 +5,8 @@
 <div class="layout-container">
     <div class="sidebar">
         <nav>
-            <a href="/mixes">Mixes</a>
+            <a href="/recordings">Recordings</a>
+            <a href="/settings">Settings</a>
         </nav>
     </div>
 
@@ -34,12 +35,12 @@
     nav {
         display: flex;
         flex-direction: column;
+        font-size: 18px;
         gap: 0.5rem;
     }
 
     nav a {
         display: block;
-        text-transform: uppercase;
         text-decoration: none;
         color: #aaaaaa;
         font-weight: 500;

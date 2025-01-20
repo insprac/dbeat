@@ -2,6 +2,7 @@ use std::{borrow::Cow, sync::Mutex};
 
 use tauri::{Manager, State};
 
+mod settings;
 mod cue;
 mod fs_search;
 
@@ -18,6 +19,13 @@ impl<'a> Default for AppState<'a> {
             });
         Self { recordings_dir }
     }
+}
+
+#[tauri::command]
+async fn get_default_path() -> Option<String> {
+    let dir = AppState::default().recordings_dir;
+    tracing::info!(?dir, "dir");
+    dir.map(|s| s.to_string())
 }
 
 #[tauri::command]
@@ -50,7 +58,7 @@ pub fn run() {
             app.manage(Mutex::new(AppState::default()));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![find_cue_sheets])
+        .invoke_handler(tauri::generate_handler![get_default_path, find_cue_sheets])
         .run(tauri::generate_context!())
         .unwrap_or_else(|error| {
             tracing::error!(?error, "error while running tauri application");

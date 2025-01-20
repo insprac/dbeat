@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { CueSheet } from "./cue";
 
-export async function getDefaultPath(): Promise<string> {
+export async function getDefaultPath(): Promise<string | null> {
     return await invoke("get_default_path");
 }
 
