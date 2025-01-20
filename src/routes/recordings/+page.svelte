@@ -1,16 +1,24 @@
 <script lang="ts">
+    import type { PageProps } from "../$types";
     import { findCueSheets } from "../../api";
     import type { CueSheet } from "../../cue";
+    import { searchCueSheets } from "../../search";
     import { displayDuration } from "../../time";
 
-    let cueSheets = $state([] as CueSheet[]);
+    let { data }: PageProps = $props();
 
-    findCueSheets()
-        .then((sheets) => (cueSheets = sheets))
-        .catch(console.error);
+    let filteredCueSheets = $state([] as CueSheet[]);
+    let search = $state("");
+
+    function onSearchInput(event: Event) {
+        if (event.target) {
+            search = (event.target as HTMLInputElement).value;
+        }
+    }
 </script>
 
 <main>
+    <input type="text" oninput={onSearchInput} placeholder="Search..." />
     <table>
         <thead>
             <tr>
@@ -21,10 +29,12 @@
             </tr>
         </thead>
         <tbody>
-            {#each cueSheets as sheet}
+            {#each searchCueSheets(data.cueSheets, search || "") as sheet}
                 <tr>
                     <td class="title">
-                        <a href={`/mixes/${encodeURIComponent(sheet.filePath)}`}>
+                        <a
+                            href={`/recordings/${encodeURIComponent(sheet.filePath)}`}
+                        >
                             {sheet.title}
                         </a>
                     </td>
@@ -41,8 +51,22 @@
 
 <style>
     main {
-        padding: 1rem;
         color: #aaaaaa;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.4rem 0.8rem;
+        background-color: #333;
+        border-radius: 4px;
+        border: none;
+        font-size: 16px;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    input:focus {
+        outline: 2px solid white;
     }
 
     th,

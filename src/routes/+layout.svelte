@@ -10,9 +10,9 @@
         </nav>
     </div>
 
-    <main>
+    <div class="body">
         {@render children()}
-    </main>
+    </div>
 </div>
 
 <style>
@@ -51,8 +51,9 @@
         color: #ffffff;
     }
 
-    main {
+    .body {
         flex-grow: 1;
         overflow: auto;
+        padding: 1rem;
     }
 </style>
