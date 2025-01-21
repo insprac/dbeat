@@ -1,7 +1,11 @@
 <script lang="ts">
+    import Header from "../../../components/header.svelte";
+
     export let data;
-    const { cueSheet } = data;
+    const { cueSheet, truncatedFilePath } = data;
 </script>
+
+<Header title={truncatedFilePath} tag="RECORDING" />
 
 <main>
     <h3 class="title">{cueSheet.title}</h3>
@@ -19,6 +23,7 @@
 
 <style>
     main {
+        margin-top: 1rem;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
