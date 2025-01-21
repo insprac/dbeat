@@ -1,18 +1,23 @@
 <script lang="ts">
     import Header from "../../../components/header.svelte";
+    import { openFileLocation } from "../../../api";
 
     export let data;
     const { cueSheet } = data;
 
     // There seems to be a bug in Safari WebKit where using `direction: rtl` causes the leading
     // slash to be appended instead, removing the leading slash is a fine work around for now.
-    let filePath = cueSheet.filePath.replace("/", "");
-    if (filePath.endsWith(".cue")) {
-        filePath = filePath.substring(0, filePath.length - 4);
+    let displayPath = cueSheet.filePath.replace("/", "");
+    if (displayPath.endsWith(".cue")) {
+        displayPath = displayPath.substring(0, displayPath.length - 4);
     }
 </script>
 
-<Header title={filePath} tag="RECORDING" />
+<Header
+    title={displayPath}
+    tag="RECORDING"
+    onClick={() => openFileLocation(cueSheet.filePath)}
+/>
 
 <main>
     <h3 class="title">{cueSheet.title}</h3>

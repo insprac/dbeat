@@ -1,5 +1,9 @@
 <script lang="ts">
-    let { title, tag }: { title: string; tag: string; } = $props();
+    let {
+        title,
+        tag,
+        onClick,
+    }: { title: string; tag: string; onClick?: () => void } = $props();
 
     function back() {
         history.back();
@@ -12,7 +16,7 @@
     </button>
     <div class="route-bar">
         <div class="tag">{tag}</div>
-        <div class="title">{title}</div>
+        <button class="title" onclick={onClick}>{title}</button>
     </div>
 </header>
 
@@ -33,7 +37,7 @@
         align-items: center;
         justify-content: center;
         background-color: #222;
-        transition: background-color .2s;
+        transition: background-color 0.2s;
         border-radius: 100%;
         cursor: pointer;
     }
@@ -59,7 +63,7 @@
         flex-grow: 1;
         display: flex;
         align-items: center;
-        gap: .5rem;
+        gap: 0.5rem;
         background-color: #222;
         border-radius: 3rem;
     }
@@ -77,5 +81,11 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        cursor: pointer;
+        transition: color .2s;
+    }
+
+    .title:hover {
+        color: #ccc;
     }
 </style>

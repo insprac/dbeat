@@ -14,3 +14,8 @@ export async function findCueSheets(): Promise<CueSheet[]> {
         dir: "/Users/insprac/Music/PioneerDJ/Recording",
     });
 }
+
+export async function openFileLocation(path: string): Promise<null> {
+    return await invoke("open_file_location", { path });
+}
+
