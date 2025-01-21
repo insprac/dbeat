@@ -1,6 +1,7 @@
 <script lang="ts">
     import Header from "../../../components/header.svelte";
     import { openFileLocation } from "../../../api";
+    import type { Track } from "../../../cue";
 
     export let data;
     const { cueSheet } = data;
@@ -10,6 +11,14 @@
     let displayPath = cueSheet.filePath.replace("/", "");
     if (displayPath.endsWith(".cue")) {
         displayPath = displayPath.substring(0, displayPath.length - 4);
+    }
+
+    function generateTrackLink(track: Track): string | null {
+        if (track.file) {
+            return `/songs/${encodeURIComponent(track.file.name)}`
+        } else {
+            return null
+        }
     }
 </script>
 
@@ -27,7 +36,8 @@
         {#each cueSheet.tracks as track}
             <p>
                 <span class="start-time">{track.startTime}</span>
-                {track.title} <span class="performer">- {track.performer}</span>
+                <a href={generateTrackLink(track)} class="track-link">{track.title}</a>
+                <span class="performer">- {track.performer}</span>
             </p>
         {/each}
     </div>
@@ -51,6 +61,16 @@
 
     .start-time {
         color: #999;
+    }
+
+    .track-link {
+        color: #eee;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .track-link:hover {
+        color: white;
     }
 
     .performer {

@@ -1,8 +1,10 @@
 use std::{borrow::Cow, process::Command, sync::Mutex};
 
+use songs::Song;
 use tauri::{Manager, State};
 
 mod cue;
+mod songs;
 mod fs_search;
 mod settings;
 
@@ -38,10 +40,9 @@ async fn get_cue_sheet(path: &str) -> Result<cue::CueSheet, String> {
 async fn find_cue_sheets(
     state: State<'_, Mutex<AppState<'_>>>,
 ) -> Result<Vec<cue::CueSheet>, String> {
-    let state = state.lock().map_err(|err| {
-        state.clear_poison();
-        format!("app state lock was poisoned: {err}")
-    })?;
+    let state = state
+        .lock()
+        .map_err(|error| format!("app state lock was poisoned: {error}"))?;
 
     let dir = state
         .recordings_dir
@@ -77,6 +78,14 @@ async fn open_file_location(path: &str) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn get_song(path: &str) -> Result<songs::Song, String> {
+    println!("getting song");
+    let song = songs::Song::from_file(path).map_err(|e| e.to_string())?;
+    println!("song: {song:?}");
+    Ok(song)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = AppState::default();
@@ -94,6 +103,7 @@ pub fn run() {
             get_cue_sheet,
             find_cue_sheets,
             open_file_location,
+            get_song,
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|error| {
