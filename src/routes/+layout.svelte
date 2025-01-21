@@ -17,6 +17,7 @@
 
 <style>
     .layout-container {
+        max-width: 100%;
         display: flex;
     }
 
@@ -52,8 +53,9 @@
     }
 
     .body {
-        flex-grow: 1;
-        overflow: auto;
+        width: calc(100vw - 200px);
         padding: 1rem;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 </style>

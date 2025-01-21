@@ -1,5 +1,6 @@
 <script lang="ts">
     let { title, tag }: { title: string; tag: string; } = $props();
+
     function back() {
         history.back();
     }
@@ -9,7 +10,7 @@
     <button class="back-button" aria-label="back" onclick={back}>
         <span class="arrow"></span>
     </button>
-    <div class="route">
+    <div class="route-bar">
         <div class="tag">{tag}</div>
         <div class="title">{title}</div>
     </div>
@@ -17,6 +18,8 @@
 
 <style>
     header {
+        width: 100%;
+        max-width: 100%;
         display: flex;
         gap: 1rem;
     }
@@ -24,6 +27,7 @@
     .back-button {
         width: 3rem;
         height: 3rem;
+        flex-shrink: 0;
         font-size: 16px;
         display: flex;
         align-items: center;
@@ -48,7 +52,8 @@
         border-right: none;
     }
 
-    .route {
+    .route-bar {
+        width: calc(100% - 4rem);
         height: 3rem;
         padding: 0.1rem 1rem;
         flex-grow: 1;
@@ -66,5 +71,11 @@
 
     .title {
         color: #999;
+        width: 100%;
+        text-align: left;
+        direction: rtl;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 </style>
