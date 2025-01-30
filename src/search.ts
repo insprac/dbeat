@@ -1,4 +1,5 @@
 import type { CueSheet } from "./cue";
+import type { Song } from "./song";
 
 /**
  * Search a list of cue sheets using a search term, the search checks if any of the following:
@@ -26,6 +27,33 @@ export function searchCueSheets(cueSheets: CueSheet[], searchTerm: string): CueS
             })
         ) {
             filtered.push(sheet);
+        }
+    }
+
+    return filtered;
+}
+
+
+/**
+ * Search a list of songs using a search term, the search checks if any of the following:
+ * - Title
+ * - Artist
+ * - Album
+ * - Genre
+ */
+export function searchSongs(songs: Song[], searchTerm: string): Song[] {
+    searchTerm = searchTerm.trim().toLowerCase();
+
+    let filtered = [];
+    for (let song of songs) {
+        if (
+            !searchTerm ||
+            song.title?.toLowerCase().includes(searchTerm) ||
+            song.artist?.toLowerCase().includes(searchTerm) ||
+            song.album?.toLowerCase().includes(searchTerm) ||
+            song.genre?.toLowerCase().includes(searchTerm)
+        ) {
+            filtered.push(song);
         }
     }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
-    import type { CueSheet } from "../../cue";
-    import { searchCueSheets } from "../../search";
+    import type { Song } from "../../song";
+    import { searchSongs } from "../../search";
     import { displayDuration } from "../../time";
 
     let { data }: PageProps = $props();
@@ -20,26 +20,26 @@
     <table>
         <thead>
             <tr>
-                <th>Recording Name</th>
-                <th>DJ</th>
-                <th>Songs</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
                 <th>Duration</th>
             </tr>
         </thead>
         <tbody>
-            {#each searchCueSheets(data.cueSheets, search || "") as sheet}
+            {#each searchSongs(data.songs, search || "") as song}
                 <tr>
                     <td class="title">
                         <a
-                            href={`/recordings/${encodeURIComponent(sheet.filePath)}`}
+                            href={`/songs/${encodeURIComponent(song.filePath)}`}
                         >
-                            {sheet.title}
+                            {song.title}
                         </a>
                     </td>
-                    <td class="performer">{sheet.performer}</td>
-                    <td class="tracks">{sheet.tracks.length}</td>
+                    <td class="artist">{song.artist}</td>
+                    <td class="album">{song.album}</td>
                     <td class="duration">
-                        {displayDuration(sheet.waveFile?.durationSeconds || 0)}
+                        {displayDuration(song.durationSeconds || 0)}
                     </td>
                 </tr>
             {/each}

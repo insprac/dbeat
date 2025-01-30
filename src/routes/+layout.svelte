@@ -6,6 +6,7 @@
     <div class="sidebar">
         <nav>
             <a href="/recordings">Recordings</a>
+            <a href="/songs">Songs</a>
             <a href="/settings">Settings</a>
         </nav>
     </div>

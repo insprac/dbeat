@@ -1,24 +1,28 @@
 use std::{borrow::Cow, process::Command, sync::Mutex};
 
-use songs::Song;
 use tauri::{Manager, State};
 
 mod cue;
-mod songs;
 mod fs_search;
 mod settings;
+mod songs;
 
 struct AppState<'a> {
+    music_dir: Option<Cow<'a, str>>,
     recordings_dir: Option<Cow<'a, str>>,
 }
 
 impl<'a> Default for AppState<'a> {
     fn default() -> Self {
+        let music_dir = dirs::audio_dir().map(|dir| Cow::Owned(dir.to_string_lossy().into_owned()));
         let recordings_dir = dirs::audio_dir().map(|mut dir| {
             dir.push("PioneerDJ/Recording");
             Cow::Owned(dir.to_string_lossy().into_owned())
         });
-        Self { recordings_dir }
+        Self {
+            music_dir,
+            recordings_dir,
+        }
     }
 }
 
@@ -80,10 +84,28 @@ async fn open_file_location(path: &str) -> Result<(), String> {
 
 #[tauri::command]
 async fn get_song(path: &str) -> Result<songs::Song, String> {
-    println!("getting song");
+    tracing::info!(path, "attempting to get song");
     let song = songs::Song::from_file(path).map_err(|e| e.to_string())?;
-    println!("song: {song:?}");
+    tracing::info!(?song, "got song");
     Ok(song)
+}
+
+#[tauri::command]
+async fn find_songs(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<songs::Song>, String> {
+    let state = state
+        .lock()
+        .map_err(|error| format!("app state lock was poisoned: {error}"))?;
+
+    let Some(music_dir) = state.music_dir.clone().map(|dir| dir.to_string()) else {
+        return Err("music dir not set, can't find songs".to_string());
+    };
+
+    tracing::info!(music_dir, "attempting to get songs");
+    let instant = std::time::Instant::now();
+    let songs = fs_search::find_songs(&music_dir);
+    let duration = instant.elapsed();
+    tracing::info!(found = songs.len(), ?duration, "searched songs");
+    Ok(songs)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -103,6 +125,7 @@ pub fn run() {
             get_cue_sheet,
             find_cue_sheets,
             open_file_location,
+            find_songs,
             get_song,
         ])
         .run(tauri::generate_context!())

@@ -4,5 +4,6 @@ export interface Song {
     artist?: string;
     album?: string;
     genre?: string;
+    bpm?: string;
     durationSeconds: number;
 }

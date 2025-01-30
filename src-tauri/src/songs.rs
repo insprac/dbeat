@@ -1,7 +1,9 @@
+use std::{fs::File, io::BufReader};
+
 use lofty::{
-    file::{AudioFile, TaggedFileExt},
+    file::{AudioFile, FileType, TaggedFileExt},
     probe::Probe,
-    tag::Accessor,
+    tag::{Accessor, ItemKey},
 };
 use serde::Serialize;
 
@@ -23,12 +25,13 @@ pub struct Song {
     artist: Option<String>,
     album: Option<String>,
     genre: Option<String>,
+    bpm: Option<String>,
     duration_seconds: u64,
 }
 
 impl Song {
     pub fn from_file(path: &str) -> Result<Self, SongFromFileError> {
-        let tagged_file = Probe::open(path)?.read()?;
+        let tagged_file = Self::try_open_file_probe(path)?.read()?;
         let tag = match tagged_file.primary_tag() {
             Some(primary_tag) => primary_tag,
             None => tagged_file
@@ -39,13 +42,36 @@ impl Song {
         let properties = tagged_file.properties();
         let duration = properties.duration();
 
+        let bpm = tag.get_string(&ItemKey::Bpm)
+            .or_else(|| tag.get_string(&ItemKey::IntegerBpm))
+            .map(String::from);
+
         Ok(Self {
             file_path: path.to_string(),
-            title: tag.title().as_deref().map(String::from),
-            artist: tag.artist().as_deref().map(String::from),
-            album: tag.album().as_deref().map(String::from),
-            genre: tag.genre().as_deref().map(String::from),
+            title: tag.title().map(String::from),
+            artist: tag.artist().map(String::from),
+            album: tag.album().map(String::from),
+            genre: tag.genre().map(String::from),
+            bpm,
             duration_seconds: duration.as_secs(),
         })
+    }
+
+    /// Trys to open probe expecting the format to match the file extension (`.flac`, `.mp3`, etc).
+    /// If there is no extension or the extension isn't supported the `lofty` will try to guess the
+    /// file type based on the file's contents.
+    fn try_open_file_probe(path: &str) -> Result<Probe<BufReader<File>>, SongFromFileError> {
+        let file = std::fs::File::open(path)?;
+        let reader = std::io::BufReader::new(file);
+
+        let Some(extension) = std::path::Path::new(path).extension() else {
+            return Ok(Probe::new(reader).guess_file_type()?);
+        };
+
+        let Some(file_type) = FileType::from_ext(extension) else {
+            return Ok(Probe::new(reader).guess_file_type()?);
+        };
+
+        Ok(Probe::new(reader).set_file_type(file_type))
     }
 }

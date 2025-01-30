@@ -24,3 +24,6 @@ export async function getSong(path: string): Promise<Song> {
     return await invoke("get_song", { path });
 }
 
+export async function findSongs(): Promise<Song[]> {
+    return await invoke("find_songs");
+}
