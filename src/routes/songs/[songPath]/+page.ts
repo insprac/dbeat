@@ -1,4 +1,4 @@
-import { getCueSheet, getDefaultPath, getSong } from "../../../api";
+import { getSong } from "../../../api";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params }) => {

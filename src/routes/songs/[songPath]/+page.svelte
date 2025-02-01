@@ -3,7 +3,7 @@
     import { openFileLocation } from "../../../api";
     import { displayDuration } from "../../../time";
     import { Icon } from "../../../components/icons";
-    import Metadata from "../../../components/metadata.svelte";
+    import IconLabel from "../../../components/icon_label.svelte";
 
     export let data;
     const { song } = data;
@@ -22,26 +22,26 @@
     <p class="artist">{song.artist}</p>
 
     <div class="metadata-container">
-        <Metadata icon={Icon.Clock}>
+        <IconLabel icon={Icon.Clock} tooltip="Duration">
             {displayDuration(song.durationSeconds)}
-        </Metadata>
+        </IconLabel>
 
         {#if song.album}
-            <Metadata icon={Icon.Album}>
+            <IconLabel icon={Icon.Album} tooltip="Album">
                 {song.album}
-            </Metadata>
+            </IconLabel>
         {/if}
 
         {#if song.genre}
-            <Metadata icon={Icon.Genre}>
+            <IconLabel icon={Icon.Genre} tooltip="Genre">
                 {song.genre}
-            </Metadata>
+            </IconLabel>
         {/if}
 
         {#if song.bpm}
-            <Metadata icon={Icon.Bpm}>
+            <IconLabel icon={Icon.Bpm} tooltip="BPM">
                 {song.bpm}
-            </Metadata>
+            </IconLabel>
         {/if}
     </div>
 </main>
@@ -58,7 +58,7 @@
 
     .metadata-container {
         display: flex;
-        flex-direction: column;
-        gap: .5rem;
+        gap: 1rem;
+        color: #999;
     }
 </style>
