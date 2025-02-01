@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
+    import Header from "../../components/header.svelte";
     import type { CueSheet } from "../../cue";
     import { searchCueSheets } from "../../search";
     import { displayDuration } from "../../time";
@@ -16,6 +17,7 @@
 </script>
 
 <main>
+    <Header tag="RECORDINGS" title={data.recordingsDir} />
     <input type="text" oninput={onSearchInput} placeholder="Search..." />
     <table>
         <thead>
@@ -50,6 +52,9 @@
 <style>
     main {
         color: #aaaaaa;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     input {
@@ -60,7 +65,6 @@
         border: none;
         font-size: 16px;
         color: white;
-        margin-bottom: 1rem;
     }
 
     input:focus {

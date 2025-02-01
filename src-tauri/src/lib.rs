@@ -30,9 +30,17 @@ impl<'a> Default for AppState<'a> {
 }
 
 #[tauri::command]
-async fn get_default_path() -> Option<String> {
-    let dir = AppState::default().recordings_dir;
-    dir.map(|s| s.to_string())
+async fn get_recordings_dir(
+    state: State<'_, Mutex<AppState<'_>>>,
+) -> Result<Option<String>, String> {
+    let state = state.lock().unwrap();
+    Ok(state.recordings_dir.clone().map(|s| s.to_string()))
+}
+
+#[tauri::command]
+async fn get_music_dir(state: State<'_, Mutex<AppState<'_>>>) -> Result<Option<String>, String> {
+    let state = state.lock().unwrap();
+    Ok(state.music_dir.clone().map(|s| s.to_string()))
 }
 
 #[tauri::command]
@@ -86,10 +94,7 @@ async fn open_file_location(path: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn get_song(
-    database: State<'_, Mutex<Database>>,
-    path: &str,
-) -> Result<songs::Song, String> {
+async fn get_song(database: State<'_, Mutex<Database>>, path: &str) -> Result<songs::Song, String> {
     let database = database.lock().unwrap();
     database.get_song(path).map_err(|e| e.to_string())
 }
@@ -129,7 +134,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            get_default_path,
+            get_recordings_dir,
+            get_music_dir,
             get_cue_sheet,
             find_cue_sheets,
             open_file_location,

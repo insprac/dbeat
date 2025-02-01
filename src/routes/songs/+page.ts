@@ -1,8 +1,8 @@
-import { findSongs } from "../../api";
-import type { Song } from "../../song";
+import { findSongs, getMusicDir } from "../../api";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async (): Promise<{ songs: Song[] }> => {
+export const load: PageLoad = async () => {
     const songs = await findSongs();
-    return { songs };
+    const musicDir = await getMusicDir();
+    return { songs, musicDir };
 }

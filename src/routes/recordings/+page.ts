@@ -1,8 +1,8 @@
-import { findCueSheets } from "../../api";
-import type { CueSheet } from "../../cue";
+import { findCueSheets, getMusicDir, getRecordingsDir } from "../../api";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async (): Promise<{ cueSheets: CueSheet[] }> => {
+export const load: PageLoad = async () => {
     const cueSheets = await findCueSheets();
-    return { cueSheets };
+    const recordingsDir = await getRecordingsDir();
+    return { cueSheets, recordingsDir };
 }

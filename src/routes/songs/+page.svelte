@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
-    import type { Song } from "../../song";
+    import Header from "../../components/header.svelte";
     import { searchSongs } from "../../search";
     import { displayDuration } from "../../time";
 
@@ -16,6 +16,7 @@
 </script>
 
 <main>
+    <Header tag="SONGS" title={data.musicDir} />
     <input type="text" oninput={onSearchInput} placeholder="Search..." />
     <table>
         <thead>
@@ -49,6 +50,9 @@
 
 <style>
     main {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
         color: #aaaaaa;
     }
 
@@ -60,7 +64,6 @@
         border: none;
         font-size: 16px;
         color: white;
-        margin-bottom: 1rem;
     }
 
     input:focus {
@@ -78,11 +81,11 @@
         color: #eee;
     }
 
-    td.performer {
+    td.artist {
         color: #777;
     }
 
-    td.tracks {
+    td.album {
         color: #777;
     }
 
