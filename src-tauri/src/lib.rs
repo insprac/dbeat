@@ -86,22 +86,18 @@ async fn open_file_location(path: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn get_song(path: &str) -> Result<songs::Song, String> {
-    let song = songs::Song::from_file(path).map_err(|e| e.to_string())?;
-    Ok(song)
+async fn get_song(
+    database: State<'_, Mutex<Database>>,
+    path: &str,
+) -> Result<songs::Song, String> {
+    let database = database.lock().unwrap();
+    database.get_song(path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 async fn find_songs(database: State<'_, Mutex<Database>>) -> Result<Vec<songs::Song>, String> {
-    let database = database
-        .lock()
-        .map_err(|error| format!("database lock was poisoned: {error}"))?;
-
-    let instant = std::time::Instant::now();
-    let songs = database.list_songs().unwrap();
-    let duration = instant.elapsed();
-    tracing::debug!(found = songs.len(), ?duration, "searched songs");
-    Ok(songs)
+    let database = database.lock().unwrap();
+    database.list_songs().map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
