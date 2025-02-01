@@ -1,11 +1,11 @@
-import { getCueSheet } from "../../../api";
+import { getRecording } from "../../../api";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params }) => {
     const { recordingPath } = params;
     const path = decodeURIComponent(recordingPath);
 
-    const cueSheet = await getCueSheet(path);
+    const recording = await getRecording(path);
 
-    return { cueSheet };
+    return { recording };
 }

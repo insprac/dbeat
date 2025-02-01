@@ -1,4 +1,4 @@
-export interface CueSheet {
+export interface Recording {
   filePath: string;
   rem: [string, string][];
   title?: string;

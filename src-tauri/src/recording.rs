@@ -44,11 +44,11 @@ pub struct WaveFile {
     pub total_samples: u32,
 }
 
-/// Represents a recording/mix from Rekordbox, it's really just a cue sheet but we only care about
-/// how Rekordbox exports them rather than supporting all cue sheet syntax.
+/// Represents a recording/mix from Rekordbox, instead of supporting all cue sheet syntax we only
+/// support the fields Rekordbox exports.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CueSheet {
+pub struct Recording {
     /// The original cue sheet file path where this data was extracted from.
     pub file_path: String,
     /// A list of metadata comments.
@@ -66,7 +66,7 @@ pub struct CueSheet {
     pub wave_file: Option<WaveFile>,
 }
 
-impl CueSheet {
+impl Recording {
     pub fn parse(file_path: String, input: &str) -> Self {
         let mut sheet = Self {
             file_path,

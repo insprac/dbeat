@@ -1,11 +1,12 @@
 use std::{borrow::Cow, process::Command, sync::Mutex};
 
 use db::Database;
+use recording::Recording;
 use tauri::{Manager, State};
 
-mod cue;
 mod db;
 mod fs_search;
+mod recording;
 mod songs;
 
 /// The core app state handled by Tauri and passed into commands, etc.
@@ -44,20 +45,16 @@ async fn get_music_dir(state: State<'_, Mutex<AppState<'_>>>) -> Result<Option<S
 }
 
 #[tauri::command]
-async fn get_cue_sheet(path: &str) -> Result<cue::CueSheet, String> {
-    fs_search::read_cue_sheet(path).map_err(|error| {
+async fn get_recording(path: &str) -> Result<Recording, String> {
+    fs_search::read_recording(path).map_err(|error| {
         tracing::error!(?error, "failed to read file");
         error.to_string()
     })
 }
 
 #[tauri::command]
-async fn find_cue_sheets(
-    state: State<'_, Mutex<AppState<'_>>>,
-) -> Result<Vec<cue::CueSheet>, String> {
-    let state = state
-        .lock()
-        .map_err(|error| format!("app state lock was poisoned: {error}"))?;
+async fn find_recordings(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<Recording>, String> {
+    let state = state.lock().unwrap();
 
     let dir = state
         .recordings_dir
@@ -65,9 +62,9 @@ async fn find_cue_sheets(
         .ok_or_else(|| "recording directory not set".to_string())?;
 
     let instant = std::time::Instant::now();
-    let sheets = fs_search::find_cue_sheets(&dir);
+    let sheets = fs_search::find_recordings(&dir);
     let duration = instant.elapsed();
-    tracing::debug!(?duration, found = sheets.len(), "searched cue sheets");
+    tracing::debug!(?duration, found = sheets.len(), "searched recordings");
 
     Ok(sheets)
 }
@@ -136,8 +133,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_recordings_dir,
             get_music_dir,
-            get_cue_sheet,
-            find_cue_sheets,
+            get_recording,
+            find_recordings,
             open_file_location,
             find_songs,
             get_song,

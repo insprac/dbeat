@@ -1,8 +1,7 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
     import Header from "../../components/header.svelte";
-    import type { CueSheet } from "../../cue";
-    import { searchCueSheets } from "../../search";
+    import { searchRecordings } from "../../search";
     import { displayDuration } from "../../time";
 
     let { data }: PageProps = $props();
@@ -29,7 +28,7 @@
             </tr>
         </thead>
         <tbody>
-            {#each searchCueSheets(data.cueSheets, search || "") as sheet}
+            {#each searchRecordings(data.recordings, search || "") as sheet}
                 <tr>
                     <td class="title">
                         <a

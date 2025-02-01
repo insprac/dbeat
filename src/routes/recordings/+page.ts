@@ -1,8 +1,8 @@
-import { findCueSheets, getMusicDir, getRecordingsDir } from "../../api";
+import { findRecordings, getRecordingsDir } from "../../api";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async () => {
-    const cueSheets = await findCueSheets();
+    const recordings = await findRecordings();
     const recordingsDir = await getRecordingsDir();
-    return { cueSheets, recordingsDir };
+    return { recordings, recordingsDir };
 }

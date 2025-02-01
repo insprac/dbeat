@@ -3,7 +3,7 @@ use std::path::Path;
 use lofty::file::FileType;
 
 use crate::{
-    cue::{CueSheet, WaveFile},
+    recording::{Recording, WaveFile},
     songs::Song,
 };
 
@@ -14,7 +14,7 @@ use crate::{
 /// file with the same filename aside from the extension.
 ///
 /// Any IO errors are logged and otherwise ignored.
-pub fn find_cue_sheets(path: &str) -> Vec<CueSheet> {
+pub fn find_recordings(path: &str) -> Vec<Recording> {
     let dir = match std::fs::read_dir(path) {
         Ok(dir) => dir,
         Err(error) => {
@@ -49,12 +49,12 @@ pub fn find_cue_sheets(path: &str) -> Vec<CueSheet> {
         }
     }
 
-    let mut cue_sheets: Vec<CueSheet> = Vec::new();
+    let mut recordings: Vec<Recording> = Vec::new();
 
     for file in cue_files {
-        match read_cue_sheet(&file) {
-            Ok(cue_sheet) => {
-                cue_sheets.push(cue_sheet);
+        match read_recording(&file) {
+            Ok(recording) => {
+                recordings.push(recording);
             }
             Err(error) => {
                 tracing::warn!(?error, file, "failed to read cue file");
@@ -63,10 +63,10 @@ pub fn find_cue_sheets(path: &str) -> Vec<CueSheet> {
     }
 
     for dir in dirs {
-        cue_sheets.append(&mut find_cue_sheets(&dir));
+        recordings.append(&mut find_recordings(&dir));
     }
 
-    cue_sheets
+    recordings
 }
 
 pub fn find_songs(path: &str) -> Vec<Song> {
@@ -128,11 +128,11 @@ pub fn find_songs(path: &str) -> Vec<Song> {
 }
 
 /// Reads a cue sheet with the given path and parses the file contents.
-/// Note this can result in an empty `CueSheet` struct if it's not formatted correctly.
+/// Note this can result in an empty `Recording` struct if it's not formatted correctly.
 /// Fails if there was an IO error such as the file not existing or lack of permission.
-pub fn read_cue_sheet(path: &str) -> Result<CueSheet, std::io::Error> {
+pub fn read_recording(path: &str) -> Result<Recording, std::io::Error> {
     let content = std::fs::read_to_string(path)?;
-    let mut cue = CueSheet::parse(path.to_string(), &content);
+    let mut cue = Recording::parse(path.to_string(), &content);
     cue.wave_file = try_find_wav_for_cue_file(&cue.file_path);
     Ok(cue)
 }

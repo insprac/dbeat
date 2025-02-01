@@ -1,18 +1,18 @@
-import type { CueSheet } from "./cue";
+import type { Recording } from "./recording";
 import type { Song } from "./song";
 
 /**
- * Search a list of cue sheets using a search term, the search checks if any of the following:
+ * Search a list of recordings using a search term, the search checks if any of the following:
  * - Recording title
  * - Recording DJ
  * - All track titles
  * - All track artist
  */
-export function searchCueSheets(cueSheets: CueSheet[], searchTerm: string): CueSheet[] {
+export function searchRecordings(recordings: Recording[], searchTerm: string): Recording[] {
     searchTerm = searchTerm.trim().toLowerCase();
 
     let filtered = [];
-    for (let sheet of cueSheets) {
+    for (let sheet of recordings) {
         if (
             !searchTerm ||
             // Search mix title and DJ
