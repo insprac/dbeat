@@ -20,16 +20,17 @@ pub enum SongFromFileError {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Song {
-    file_path: String,
-    title: Option<String>,
-    artist: Option<String>,
-    album: Option<String>,
-    genre: Option<String>,
-    bpm: Option<String>,
-    duration_seconds: u64,
+    pub file_path: String,
+    pub title: Option<String>,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub genre: Option<String>,
+    pub bpm: Option<f64>,
+    pub duration_seconds: u64,
 }
 
 impl Song {
+    /// Read a song's metadata from the given file path if it exists and is a supported format.
     pub fn from_file(path: &str) -> Result<Self, SongFromFileError> {
         let tagged_file = Self::try_open_file_probe(path)?.read()?;
         let tag = match tagged_file.primary_tag() {
@@ -42,9 +43,17 @@ impl Song {
         let properties = tagged_file.properties();
         let duration = properties.duration();
 
-        let bpm = tag.get_string(&ItemKey::Bpm)
+        let bpm_string = tag
+            .get_string(&ItemKey::Bpm)
             .or_else(|| tag.get_string(&ItemKey::IntegerBpm))
-            .map(String::from);
+            .unwrap_or("");
+        let bpm = match bpm_string.parse::<f64>() {
+            Ok(bpm) => Some(bpm),
+            Err(error) => {
+                tracing::debug!(?error, "failed to parse bpm from string");
+                None
+            }
+        };
 
         Ok(Self {
             file_path: path.to_string(),

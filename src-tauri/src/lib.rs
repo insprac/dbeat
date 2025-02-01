@@ -1,12 +1,15 @@
 use std::{borrow::Cow, process::Command, sync::Mutex};
 
+use db::Database;
 use tauri::{Manager, State};
 
 mod cue;
+mod db;
 mod fs_search;
-mod settings;
 mod songs;
 
+/// The core app state handled by Tauri and passed into commands, etc.
+#[derive(Debug)]
 struct AppState<'a> {
     music_dir: Option<Cow<'a, str>>,
     recordings_dir: Option<Cow<'a, str>>,
@@ -56,7 +59,7 @@ async fn find_cue_sheets(
     let instant = std::time::Instant::now();
     let sheets = fs_search::find_cue_sheets(&dir);
     let duration = instant.elapsed();
-    tracing::info!(?duration, found = sheets.len(), "searched cue sheets");
+    tracing::debug!(?duration, found = sheets.len(), "searched cue sheets");
 
     Ok(sheets)
 }
@@ -84,27 +87,20 @@ async fn open_file_location(path: &str) -> Result<(), String> {
 
 #[tauri::command]
 async fn get_song(path: &str) -> Result<songs::Song, String> {
-    tracing::info!(path, "attempting to get song");
     let song = songs::Song::from_file(path).map_err(|e| e.to_string())?;
-    tracing::info!(?song, "got song");
     Ok(song)
 }
 
 #[tauri::command]
-async fn find_songs(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<songs::Song>, String> {
-    let state = state
+async fn find_songs(database: State<'_, Mutex<Database>>) -> Result<Vec<songs::Song>, String> {
+    let database = database
         .lock()
-        .map_err(|error| format!("app state lock was poisoned: {error}"))?;
+        .map_err(|error| format!("database lock was poisoned: {error}"))?;
 
-    let Some(music_dir) = state.music_dir.clone().map(|dir| dir.to_string()) else {
-        return Err("music dir not set, can't find songs".to_string());
-    };
-
-    tracing::info!(music_dir, "attempting to get songs");
     let instant = std::time::Instant::now();
-    let songs = fs_search::find_songs(&music_dir);
+    let songs = database.list_songs().unwrap();
     let duration = instant.elapsed();
-    tracing::info!(found = songs.len(), ?duration, "searched songs");
+    tracing::debug!(found = songs.len(), ?duration, "searched songs");
     Ok(songs)
 }
 
@@ -112,12 +108,28 @@ async fn find_songs(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<songs::
 pub fn run() {
     let app_state = AppState::default();
 
-    tracing::info!(recordings_dir=?app_state.recordings_dir, "dbeat starting");
+    tracing::info!(state=?app_state, "dbeat starting");
+
+    let database = Database::init().unwrap();
+
+    // Seed the database with songs from the music dir.
+    match app_state.music_dir.clone().map(|dir| dir.to_string()) {
+        Some(music_dir) => {
+            for song in fs_search::find_songs(&music_dir) {
+                if let Err(error) = database.insert_song(&song) {
+                    tracing::error!(?error, "failed to insert song");
+                }
+            }
+        }
+        None => {
+            tracing::warn!("music dir not set, can't load songs into the database");
+        }
+    };
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
+            app.manage(Mutex::new(database));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
