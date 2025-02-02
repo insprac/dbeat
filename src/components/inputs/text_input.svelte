@@ -45,8 +45,8 @@ value evey time a change is made to the input.
     input {
         width: 100%;
         padding: 0.4rem 0.8rem;
-        background-color: #333;
-        border-radius: 4px;
+        background-color: #2f2f2f;
+        border-radius: .5rem;
         border: none;
         font-size: 16px;
         color: white;
