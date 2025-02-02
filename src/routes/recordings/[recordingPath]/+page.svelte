@@ -36,6 +36,7 @@
         <h2>{recording.title}</h2>
         <p class="artist">{recording.performer}</p>
     </div>
+
     {#if recording.waveFile}
         <div class="metadata">
             <IconLabel icon={Icon.Clock} tooltip="Duration">
@@ -43,6 +44,7 @@
             </IconLabel>
         </div>
     {/if}
+
     <div class="track-list">
         {#each recording.tracks as track}
             <p>

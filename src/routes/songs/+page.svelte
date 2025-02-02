@@ -1,23 +1,28 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
     import Header from "../../components/header.svelte";
+    import TextInput from "../../components/inputs/text_input.svelte";
     import { searchSongs } from "../../search";
     import { displayDuration } from "../../time";
 
     let { data }: PageProps = $props();
 
-    let search = $state("");
+    let searchTerm = $state("");
 
-    function onSearchInput(event: Event) {
-        if (event.target) {
-            search = (event.target as HTMLInputElement).value;
-        }
+    function onSearchInput(value: string) {
+        searchTerm = value;
     }
 </script>
 
 <main>
     <Header tag="SONGS" title={data.musicDir} />
-    <input type="text" oninput={onSearchInput} placeholder="Search..." />
+
+    <TextInput
+        value={searchTerm}
+        onInput={onSearchInput}
+        placeholder="Search..."
+    />
+
     <table>
         <thead>
             <tr>
@@ -28,12 +33,10 @@
             </tr>
         </thead>
         <tbody>
-            {#each searchSongs(data.songs, search || "") as song}
+            {#each searchSongs(data.songs, searchTerm || "") as song}
                 <tr>
                     <td class="title">
-                        <a
-                            href={`/songs/${encodeURIComponent(song.filePath)}`}
-                        >
+                        <a href={`/songs/${encodeURIComponent(song.filePath)}`}>
                             {song.title}
                         </a>
                     </td>

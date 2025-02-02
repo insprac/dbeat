@@ -1,23 +1,22 @@
 <script lang="ts">
     import type { PageProps } from "../$types";
     import Header from "../../components/header.svelte";
+    import TextInput from "../../components/inputs/text_input.svelte";
     import { searchRecordings } from "../../search";
     import { displayDuration } from "../../time";
 
     let { data }: PageProps = $props();
 
-    let search = $state("");
+    let searchTerm = $state("");
 
-    function onSearchInput(event: Event) {
-        if (event.target) {
-            search = (event.target as HTMLInputElement).value;
-        }
+    function onSearchInput(value: string) {
+        searchTerm = value;
     }
 </script>
 
 <main>
     <Header tag="RECORDINGS" title={data.recordingsDir} />
-    <input type="text" oninput={onSearchInput} placeholder="Search..." />
+    <TextInput value={searchTerm} onInput={onSearchInput} placeholder="Search..." />
     <table>
         <thead>
             <tr>
@@ -28,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-            {#each searchRecordings(data.recordings, search || "") as sheet}
+            {#each searchRecordings(data.recordings, searchTerm || "") as sheet}
                 <tr>
                     <td class="title">
                         <a

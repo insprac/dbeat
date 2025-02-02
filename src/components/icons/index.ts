@@ -2,6 +2,7 @@ import Clock from "./clock.svelte";
 import Album from "./album.svelte";
 import Genre from "./genre.svelte";
 import Bpm from "./bpm.svelte";
+import Search from "./search.svelte";
 import type { Component } from "svelte";
 
 export { Clock, Album, Genre, Bpm }
@@ -11,6 +12,7 @@ export enum Icon {
     Album,
     Genre,
     Bpm,
+    Search,
 }
 
 export interface IconProps {
@@ -28,5 +30,7 @@ export function iconComponent(icon: Icon): Component<IconProps> {
             return Genre;
         case Icon.Bpm:
             return Bpm;
+        case Icon.Search:
+            return Search;
     }
 }
