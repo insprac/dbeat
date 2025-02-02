@@ -51,6 +51,10 @@ pub struct WaveFile {
 pub struct Recording {
     /// The original cue sheet file path where this data was extracted from.
     pub file_path: String,
+    /// Last modified (unix seconds) taken from the file's metadata.
+    pub last_modified_unix_seconds: i64,
+    /// Last accessed (unix seconds) taken from the file's metadata.
+    pub last_accessed_unix_seconds: i64,
     /// A list of metadata comments.
     pub rem: Vec<(String, String)>,
     /// The title of the recording.
@@ -67,11 +71,21 @@ pub struct Recording {
 }
 
 impl Recording {
-    pub fn parse(file_path: String, input: &str) -> Self {
-        let mut sheet = Self {
-            file_path,
+    pub fn parse(file_path: &str, input: &str) -> Self {
+        let mut recording = Self {
+            file_path: file_path.to_string(),
             ..Default::default()
         };
+
+        // Try get the last modified and access times from the file's metadata, ignore any errors.
+        if let Ok(metadata) = std::fs::metadata(file_path) {
+            let modified_time = filetime::FileTime::from_last_modification_time(&metadata);
+            recording.last_modified_unix_seconds = modified_time.unix_seconds();
+
+            let accessed_time = filetime::FileTime::from_last_access_time(&metadata);
+            recording.last_accessed_unix_seconds = accessed_time.unix_seconds();
+        }
+
         let mut current_track: Option<Track> = None;
 
         for line in input.lines() {
@@ -89,30 +103,30 @@ impl Recording {
                     if parts.len() >= 3 {
                         let key = parts[1].to_string();
                         let value = parts[2..].join(" ").trim_matches('"').to_string();
-                        sheet.rem.push((key, value));
+                        recording.rem.push((key, value));
                     }
                 }
-                // TITLE can be part of the entire sheet or a TRACK.
+                // TITLE can be part of the entire recording or a TRACK.
                 "TITLE" => {
                     if let Some(title) = extract_quoted_string(&line[5..]) {
                         if let Some(track) = &mut current_track {
                             track.title = Some(title);
                         } else if tab_count == 0 {
-                            sheet.title = Some(title);
+                            recording.title = Some(title);
                         }
                     }
                 }
-                // PERFORMER can be part of the entire sheet or a TRACK.
+                // PERFORMER can be part of the entire recording or a TRACK.
                 "PERFORMER" => {
                     if let Some(performer) = extract_quoted_string(&line[9..]) {
                         if let Some(track) = &mut current_track {
                             track.performer = Some(performer);
                         } else if tab_count == 0 {
-                            sheet.performer = Some(performer);
+                            recording.performer = Some(performer);
                         }
                     }
                 }
-                // FILE can be part of the entire sheet or a TRACK.
+                // FILE can be part of the entire recording or a TRACK.
                 "FILE" => {
                     if let Some(format) = parts.last() {
                         let line_inner = &line[4..line.len() - format.len()];
@@ -124,14 +138,14 @@ impl Recording {
                             if let Some(track) = &mut current_track {
                                 track.file = Some(file);
                             } else if tab_count == 0 {
-                                sheet.file = Some(file);
+                                recording.file = Some(file);
                             }
                         }
                     }
                 }
                 "TRACK" => {
                     if let Some(track) = &mut current_track {
-                        sheet.tracks.push(track.to_owned());
+                        recording.tracks.push(track.to_owned());
                     }
                     current_track = Some(Track::default());
                 }
@@ -147,10 +161,10 @@ impl Recording {
         }
 
         if let Some(track) = current_track {
-            sheet.tracks.push(track);
+            recording.tracks.push(track);
         }
 
-        sheet
+        recording
     }
 }
 

@@ -62,11 +62,17 @@ async fn find_recordings(state: State<'_, Mutex<AppState<'_>>>) -> Result<Vec<Re
         .ok_or_else(|| "recording directory not set".to_string())?;
 
     let instant = std::time::Instant::now();
-    let sheets = fs_search::find_recordings(&dir);
+    let mut recordings = fs_search::find_recordings(&dir);
     let duration = instant.elapsed();
-    tracing::debug!(?duration, found = sheets.len(), "searched recordings");
+    tracing::debug!(?duration, found = recordings.len(), "searched recordings");
 
-    Ok(sheets)
+    // Sort my the last modified date for relevant recordings first.
+    recordings.sort_by(|a, b| {
+        b.last_modified_unix_seconds
+            .cmp(&a.last_modified_unix_seconds)
+    });
+
+    Ok(recordings)
 }
 
 #[tauri::command]

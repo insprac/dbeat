@@ -1,5 +1,7 @@
 export interface Recording {
   filePath: string;
+  lastModifiedUnixSeconds: number;
+  lastAccessedUnixSeconds: number;
   rem: [string, string][];
   title?: string;
   performer?: string;

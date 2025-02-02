@@ -132,7 +132,7 @@ pub fn find_songs(path: &str) -> Vec<Song> {
 /// Fails if there was an IO error such as the file not existing or lack of permission.
 pub fn read_recording(path: &str) -> Result<Recording, std::io::Error> {
     let content = std::fs::read_to_string(path)?;
-    let mut cue = Recording::parse(path.to_string(), &content);
+    let mut cue = Recording::parse(path, &content);
     cue.wave_file = try_find_wav_for_cue_file(&cue.file_path);
     Ok(cue)
 }
